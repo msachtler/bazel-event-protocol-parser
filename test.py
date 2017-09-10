@@ -13,6 +13,8 @@ decoder = _DecodeVarint32
 
 messages = []
 
+# Loop over the input data, decoding the varint prefix on each message, then
+# decoding that many bytes at a time.
 next_pos, pos = 0, 0
 while pos < len(data):
     event = BuildEvent()
@@ -22,9 +24,7 @@ while pos < len(data):
     pos += next_pos
 
     # use parsed message
-    print 80 * '-' 
+    print 80 * '-'
     print(event)
-    print type(event.children)
-
 
 print len(messages)
