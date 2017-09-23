@@ -1,30 +1,20 @@
 # File //:WORKSPACE
 workspace(name = "build_events")
 
-#git_repository(
-#    name = "org_pubref_rules_protobuf",
-#    remote = "https://github.com/pubref/rules_protobuf.git",
-#    commit = "master",
-#)
 #
-#
-## Load language-specific dependencies
-#load("@org_pubref_rules_protobuf//python:rules.bzl", "py_proto_repositories")
-#py_proto_repositories()
-#
-
-#git_repository(
+#http_archive(
 #    name = "com_google_protobuf",
-#    remote = "https://github.com/google/protobuf.git",
-#    tag = "v3.4.0",
+#    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
+#    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
+#    sha256 = "ff771a662fb6bd4d3cc209bcccedef3e93980a49f71df1e987f6afa3bcdcba3a",
 #)
 
-http_archive(
-    name = "com_google_protobuf",
-    urls = ["https://github.com/google/protobuf/archive/b4b0e304be5a68de3d0ee1af9b286f958750f5e4.zip"],
-    strip_prefix = "protobuf-b4b0e304be5a68de3d0ee1af9b286f958750f5e4",
-    sha256 = "ff771a662fb6bd4d3cc209bcccedef3e93980a49f71df1e987f6afa3bcdcba3a",
+git_repository(
+    name = "org_pubref_rules_protobuf",
+    remote = "https://github.com/pubref/rules_protobuf.git",
+    tag = "v0.8.0",
 )
+
 
 
 new_http_archive(
@@ -38,3 +28,22 @@ bind(
     name = "six",
     actual = "@six_archive//:six",
 )
+
+http_file(
+    name = "build_event_proto",
+    urls = ["https://raw.githubusercontent.com/googleapis/googleapis/master/google/devtools/build/v1/publish_build_event.proto"],
+)
+
+#new_http_archive(
+#    name = "com_google_googleapis",
+#    urls = ["https://github.com/googleapis/googleapis/archive/master.zip"],
+#    strip_prefix = "googleapis-master",
+#    build_file_content = """
+#exports_files(glob(["google/**"]))
+#"""
+#)
+
+
+# Load language-specific dependencies
+load("@org_pubref_rules_protobuf//python:rules.bzl", "py_proto_repositories")
+py_proto_repositories()
