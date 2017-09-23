@@ -4,7 +4,11 @@ import math
 
 import grpc
 
-from build_event_stream_pb2 import BuildEvent
+from build_events.parse_event import (
+        decode_from_str,
+        print_stderr
+)
+from build_events.build_event_stream_pb2 import BuildEvent
 import google.devtools.build.v1.publish_build_event_pb2 as pbe
 import google.devtools.build.v1.publish_build_event_pb2_grpc as pbe_grpc
 import google.protobuf.empty_pb2
@@ -61,15 +65,11 @@ class MyPublishBuildEventServicer(object):
             event_bytes = request.event.bazel_event
 #            print dir(event_bytes)
 #            print type(event_bytes.value)
-            parse_bazel_event(event_bytes.value)
+
+            event = decode_from_str(event_bytes.value)
+            print_stderr(event)
         
             yield pbe.PublishBuildToolEventStreamResponse()
-
-def parse_bazel_event(data):
-    event = BuildEvent()
-    event.ParseFromString(data)
-    if event.progress.stderr:
-        print event.progress.stderr
 
 
 def serve():
