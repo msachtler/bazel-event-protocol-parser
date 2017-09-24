@@ -29,6 +29,7 @@ def print_stderr(event):
         print event.progress.stderr
 
 def handle(event):
+    print 10 * "="
     process(event)
     print_stderr(event)
 
@@ -74,10 +75,99 @@ def process(event):
 
     for c in event.children:
         print "child", c.WhichOneof("id")
-
+    event_db.register(event)
 
 def print_target_configured(event):
     print event.HasField("configured")
-    print "---"
     print event.id.target_configured.label
-    print "---"
+
+
+#
+# TODO
+#
+# I think the way to handle these IDs is to have the db keep a list of
+# messages of each ID type. Whenever a message comes in, it is looked up in
+# the appropriate bin, and inserted if it didn't exist. Its children are
+# looked up too, and inserted if they don't exist.
+#
+# Each bucket would have its own message-specific way of doing lookups, since
+# the information is different in each. In reality, a dictionary will probably
+# serve well for many of them, but there seem to be a couple types with no
+# actual information. I assume that means we'll only ever get one of them.
+#
+
+class Identifier(object):
+    def __init__(self, id_object):
+        self.id_object = id_object
+        self.children = []
+
+class PatternIdentifier(Identifier):
+    def __init__(self, id_object):
+        Identifier.__init__(self, id_object)
+        message = None
+
+
+class EventDb(object):
+    def __init__(self):
+        self.db = {}
+        self.unseen = set()
+
+    def register(self, event):
+        print "Registering event."
+
+        id_type = event.id.WhichOneof("id")
+        if id_type == "unknown":
+            print "got an UnknownBuildEventId"
+        elif id_type == "progress":
+            print "progress"
+        elif id_type == "started":
+            print "started"
+        elif id_type == "command_line":
+            print "command_line"
+        elif id_type == "workspace_status":
+            print "workspace_status"
+        elif id_type == "options_parsed":
+            print "options_parsed"
+        elif id_type == "fetch":
+            print "fetch"
+        elif id_type == "configuration":
+            print "configuration"
+        elif id_type == "target_configured":
+            print "target_configured"
+        elif id_type == "pattern":
+            print "pattern"
+            id_obj = PatternIdentifier(event.id)
+        elif id_type == "pattern_skipped":
+            print "pattern_skipped"
+        elif id_type == "named_set":
+            print "named_set"
+        elif id_type == "target_completed":
+            print "target_completed"
+        elif id_type == "action_completed":
+            print "action_completed"
+        elif id_type == "test_result":
+            print "test_result"
+        elif id_type == "test_summary":
+            print "test_summary"
+        elif id_type == "build_finished":
+            print "build_finished"
+        else:
+            print "ERROR: unknown",
+            print id_type
+
+#        print "progress"
+#        print event.id in self.db.keys()
+#
+#        print type(event.id)
+#
+##        self.db[event.id] = event
+#
+#        for c in event.children:
+#            if c not in db.keys():
+#                print "Unseen child"
+#                self.unseen.add(c)
+#            else:
+#                print "Seen child!"
+        
+
+event_db = EventDb()
